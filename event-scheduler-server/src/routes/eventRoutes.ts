@@ -49,5 +49,33 @@ router.get('/events', (_req: Request, res: Response) => {
   res.status(200).json(sortedEvents);
 });
 
+// PUT /api/events/:id
+router.put('/events/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const index = events.findIndex(e => e.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: 'Event not found' });
+  }
+
+  events[index] = { ...events[index], ...req.body };
+  return res.status(200).json({ message: 'Event updated', event: events[index] });
+});
+
+
+
+// DELETE - Delete event
+router.delete('/events/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const index = events.findIndex(e => e.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: 'Event not found' });
+  }
+
+  const deleted = events.splice(index, 1)[0];
+  return res.status(200).json({ message: 'Event deleted', event: deleted });
+});
+
 
 export default router;

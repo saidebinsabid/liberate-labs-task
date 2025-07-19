@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
+import Swal from 'sweetalert2';
 
 type EventFormValues = {
   title: string;
@@ -17,12 +18,17 @@ const personalKeywords = [
   "anniversary",
 ];
 
-export default function AddEventForm() {
+type AddEventFormProps = {
+  onEventAdded: () => void;
+};
+
+export default function AddEventForm({ onEventAdded }: AddEventFormProps) {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
+    reset,
   } = useForm<EventFormValues>();
 
   const watchTitle = watch("title", "");
@@ -30,7 +36,7 @@ export default function AddEventForm() {
 
   const [category, setCategory] = useState<string | null>(null);
 
-  // Detect category based on user input
+  // Auto-detect category
   useEffect(() => {
     const text = `${watchTitle} ${watchNotes}`.toLowerCase();
 
@@ -45,20 +51,48 @@ export default function AddEventForm() {
     }
   }, [watchTitle, watchNotes]);
 
-  const onSubmit = async (data: EventFormValues) => {
-    try {
-      const response = await fetch("http://localhost:5000/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
 
+
+const onSubmit = async (data: EventFormValues) => {
+  try {
+    const response = await fetch("http://localhost:5000/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
       const result = await response.json();
       console.log("Server response:", result);
-    } catch (error) {
-      console.error("Error submitting event:", error);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Event added successfully.',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      onEventAdded();
+      reset();
+    } else {
+      const errorData = await response.json();
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed!',
+        text: errorData.message || 'Something went wrong!',
+      });
     }
-  };
+  } catch (error) {
+    console.error("Error submitting event:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'Something went wrong while submitting the event!',
+    });
+  }
+};
+
 
   return (
     <form
