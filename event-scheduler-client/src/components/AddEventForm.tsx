@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
 
 type EventFormValues = {
   title: string;
@@ -7,15 +8,56 @@ type EventFormValues = {
   notes?: string;
 };
 
+const workKeywords = ["meeting", "project", "client", "deadline", "interview"];
+const personalKeywords = [
+  "birthday",
+  "family",
+  "party",
+  "vacation",
+  "anniversary",
+];
+
 export default function AddEventForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<EventFormValues>();
 
-  const onSubmit = (data: EventFormValues) => {
-    console.log("Form Data:", data);
+  const watchTitle = watch("title", "");
+  const watchNotes = watch("notes", "");
+
+  const [category, setCategory] = useState<string | null>(null);
+
+  // Detect category based on user input
+  useEffect(() => {
+    const text = `${watchTitle} ${watchNotes}`.toLowerCase();
+
+    if (workKeywords.some((word) => text.includes(word))) {
+      setCategory("Work");
+    } else if (personalKeywords.some((word) => text.includes(word))) {
+      setCategory("Personal");
+    } else if (text.trim() !== "") {
+      setCategory("Other");
+    } else {
+      setCategory(null);
+    }
+  }, [watchTitle, watchNotes]);
+
+  const onSubmit = async (data: EventFormValues) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log("Server response:", result);
+    } catch (error) {
+      console.error("Error submitting event:", error);
+    }
   };
 
   return (
@@ -25,40 +67,54 @@ export default function AddEventForm() {
     >
       {/* Title */}
       <div className="col-span-1 sm:col-span-2">
-        <label className="block font-semibold text-gray-700 mb-1">Title<span className="text-red-500">*</span></label>
+        <label className="block font-semibold text-gray-700 mb-1">
+          Title<span className="text-red-500">*</span>
+        </label>
         <input
           type="text"
           {...register("title", { required: "Title is required" })}
           className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+        )}
       </div>
 
       {/* Date */}
       <div>
-        <label className="block font-semibold text-gray-700 mb-1">Date<span className="text-red-500">*</span></label>
+        <label className="block font-semibold text-gray-700 mb-1">
+          Date<span className="text-red-500">*</span>
+        </label>
         <input
           type="date"
           {...register("date", { required: "Date is required" })}
           className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>}
+        {errors.date && (
+          <p className="text-red-500 text-sm mt-1">{errors.date.message}</p>
+        )}
       </div>
 
       {/* Time */}
       <div>
-        <label className="block font-semibold text-gray-700 mb-1">Time<span className="text-red-500">*</span></label>
+        <label className="block font-semibold text-gray-700 mb-1">
+          Time<span className="text-red-500">*</span>
+        </label>
         <input
           type="time"
           {...register("time", { required: "Time is required" })}
           className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.time && <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>}
+        {errors.time && (
+          <p className="text-red-500 text-sm mt-1">{errors.time.message}</p>
+        )}
       </div>
 
       {/* Notes */}
       <div className="col-span-1 sm:col-span-2">
-        <label className="block font-semibold text-gray-700 mb-1">Notes (optional)</label>
+        <label className="block font-semibold text-gray-700 mb-1">
+          Notes (optional)
+        </label>
         <textarea
           {...register("notes")}
           rows={4}
@@ -67,15 +123,19 @@ export default function AddEventForm() {
       </div>
 
       {/* Category */}
-      <div className="col-span-1 sm:col-span-2">
-        <label className="block font-semibold text-gray-700 mb-1">Category (auto-generated)</label>
-        <input
-          type="text"
-          value="other"
-          readOnly
-          className="w-full bg-gray-100 border border-gray-300 rounded px-4 py-2 text-gray-600"
-        />
-      </div>
+      {category && (
+        <div className="col-span-1 sm:col-span-2">
+          <label className="block font-semibold text-gray-700 mb-1">
+            Category (auto-detected)
+          </label>
+          <input
+            type="text"
+            value={category}
+            readOnly
+            className="w-full bg-gray-100 border border-gray-300 rounded px-4 py-2 text-gray-600"
+          />
+        </div>
+      )}
 
       {/* Submit Button */}
       <div className="col-span-1 sm:col-span-2">
