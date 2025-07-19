@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 
 interface EventData {
+  id: string;
   title: string;
   date: string;
   time: string;
@@ -30,14 +32,22 @@ router.post('/events', (req: Request, res: Response) => {
     category = 'Personal';
   }
 
-  const newEvent: EventData = { title, date, time, notes, category, archived };
+  const newEvent: EventData = { id: uuidv4(),title, date, time, notes, category, archived };
   events.push(newEvent);
 
   return res.status(200).json({ message: 'Event created and categorized', event: newEvent });
 });
 
 router.get('/events', (_req: Request, res: Response) => {
-  return res.status(200).json(events);
+  const sortedEvents = [...events].sort((a, b) => {
+    if (a.date === b.date) {
+      return a.time.localeCompare(b.time);
+    }
+    return a.date.localeCompare(b.date);
+  });
+
+  res.status(200).json(sortedEvents);
 });
+
 
 export default router;
