@@ -68,10 +68,6 @@ event-scheduler-client/
 ├── tsconfig.json
 ├── package.json
 └── README.md
-
-shell
-Copy
-Edit
 ```
 ---
 
