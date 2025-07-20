@@ -175,15 +175,6 @@ Events are auto-categorized based on keywords in their **title** or **notes**:
 
 ---
 
-# 💡 Bonus Features Implemented
-
-- ✅ Filter events by category (**Work**, **Personal**, **Other**)  
-- ✅ Environment variables used (`PORT`, backend base URL)  
-- ✅ SweetAlert2 for user-friendly confirmations & errors  
-- ✅ Error handling via toasts/alerts on API failure  
-
----
-
 # 👨‍💻 Author
 
 - **Name:** Saide Bin Sabid  
