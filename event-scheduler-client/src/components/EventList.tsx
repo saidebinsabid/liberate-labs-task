@@ -2,7 +2,6 @@ import { FaRegCalendarAlt, FaClock, FaStickyNote, FaTag } from "react-icons/fa";
 import { BiSolidMessageError } from "react-icons/bi";
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-
 interface EventData {
   id: string;
   title: string;
@@ -18,7 +17,7 @@ type EventListProps = {
   loading: boolean;
   setEvents: React.Dispatch<React.SetStateAction<EventData[]>>;
 };
-
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 const formatDate = (dateStr: string) => {
   try {
     return format(parseISO(dateStr), "dd MMMM yyyy");
@@ -54,7 +53,7 @@ export default function EventList({
   const handleDelete = async (id: string) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/events/${id}`, {
         method: "DELETE",
       });
 
@@ -73,7 +72,7 @@ export default function EventList({
   const handleArchive = async (id: string) => {
     setActionLoading(id);
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/events/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -124,7 +123,7 @@ export default function EventList({
           <option value="Other">Other</option>
         </select>
       </div>
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-3 xl:grid-cols-4">
         {filteredEvents.map((event) => (
           <div
             key={event.id}

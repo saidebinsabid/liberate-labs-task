@@ -15,10 +15,11 @@ interface EventData {
 function App() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   const fetchEvents = () => {
     setLoading(true);
-    fetch("http://localhost:5000/api/events")
+    fetch(`${BASE_URL}/api/events`)
       .then((res) => res.json())
       .then((data) => {
         setEvents(data);
