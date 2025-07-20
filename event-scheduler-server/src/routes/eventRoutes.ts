@@ -53,9 +53,12 @@ router.get('/events', (_req: Request, res: Response) => {
 // PUT /api/events/:id
 router.put('/events/:id', (req: Request, res: Response) => {
   const { id } = req.params;
-  const index = events.findIndex(e => e.id === id);
+  console.log('PUT /events/:id called with id:', id);
+  console.log('Current events count:', events.length);
 
+  const index = events.findIndex(e => e.id === id);
   if (index === -1) {
+    console.log('Event not found for id:', id);
     return res.status(404).json({ message: 'Event not found' });
   }
 
